@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
+from flask_login import current_user
 from modules.token_manager import (
     get_waiting_tokens, get_tokens_by_status, update_token_status,
     call_next_token, complete_token, get_token_by_id
@@ -8,44 +8,82 @@ from modules.atm_manager import (
     get_all_atm_status, update_atm_status, get_atm_by_id
 )
 from modules.analytics import get_staff_performance, get_token_statistics
-from utils.decorators import role_required, validate_json_content_type, handle_errors
+from utils.decorators import validate_json_content_type, handle_errors
+from utils.api_decorators import api_login_required, api_role_required
 from utils.validators import validate_atm_data, validate_pagination_params
 from utils.helpers import get_pagination_info
 from database import db
 from database.models import Token
 from flask_socketio import emit
+from datetime import datetime, timedelta
+from sqlalchemy import func, and_
 
 staff_bp = Blueprint('staff', __name__)
 
 @staff_bp.route('/dashboard', methods=['GET'])
-@login_required
-@role_required('staff', 'admin')
+@api_login_required
+@api_role_required('staff')
 @handle_errors
 def staff_dashboard():
-    """Get staff dashboard data"""
-    # Get statistics
-    stats = get_token_statistics()
+    """Get staff dashboard data with comprehensive statistics"""
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    tomorrow = today + timedelta(days=1)
     
-    # Get waiting tokens
-    waiting_tokens = get_waiting_tokens()
+    # Get today's tokens
+    today_tokens = Token.query.filter(
+        and_(
+            Token.generated_at >= today,
+            Token.generated_at < tomorrow
+        )
+    )
     
-    # Get in-progress tokens
-    in_progress_tokens = get_tokens_by_status('in_progress')
+    # Count by status
+    waiting_count = today_tokens.filter(Token.status == 'waiting').count()
+    in_progress_count = today_tokens.filter(Token.status == 'in_progress').count()
+    completed_count = today_tokens.filter(Token.status == 'completed').count()
+    
+    # Calculate average service time
+    completed_tokens = today_tokens.filter(
+        and_(
+            Token.status == 'completed',
+            Token.called_at.isnot(None),
+            Token.completed_at.isnot(None)
+        )
+    ).all()
+    
+    if completed_tokens:
+        total_time = sum([
+            (token.completed_at - token.called_at).total_seconds() / 60
+            for token in completed_tokens
+        ])
+        avg_service_time = round(total_time / len(completed_tokens))
+    else:
+        avg_service_time = 0
+    
+    # Get token queue (waiting and in_progress)
+    token_queue = Token.query.filter(
+        and_(
+            Token.status.in_(['waiting', 'in_progress']),
+            Token.generated_at >= today
+        )
+    ).order_by(Token.generated_at).all()
     
     # Get ATM status
     atm_status = get_all_atm_status()
     
     return jsonify({
         'status': 'success',
-        'stats': stats,
-        'waiting_tokens': [token.to_dict() for token in waiting_tokens],
-        'in_progress_tokens': [token.to_dict() for token in in_progress_tokens],
+        'waiting': waiting_count,
+        'in_progress': in_progress_count,
+        'completed_today': completed_count,
+        'avg_service_time': avg_service_time,
+        'token_queue': [token.to_dict() for token in token_queue],
         'atm_status': [atm.to_dict() for atm in atm_status]
     })
 
 @staff_bp.route('/tokens', methods=['GET'])
-@login_required
-@role_required('staff', 'admin')
+@api_login_required
+@api_role_required('staff')
 @handle_errors
 def get_staff_tokens():
     """Get tokens for staff management"""
@@ -92,8 +130,8 @@ def get_staff_tokens():
     })
 
 @staff_bp.route('/token/<int:token_id>/status', methods=['PUT'])
-@login_required
-@role_required('staff', 'admin')
+@api_login_required
+@api_role_required('staff')
 @validate_json_content_type
 @handle_errors
 def update_token_status_endpoint(token_id):
@@ -142,8 +180,8 @@ def update_token_status_endpoint(token_id):
     })
 
 @staff_bp.route('/token/<int:token_id>/call', methods=['PUT'])
-@login_required
-@role_required('staff', 'admin')
+@api_login_required
+@api_role_required('staff')
 @handle_errors
 def call_token(token_id):
     """Call a specific token"""
@@ -183,8 +221,8 @@ def call_token(token_id):
     })
 
 @staff_bp.route('/token/next', methods=['POST'])
-@login_required
-@role_required('staff', 'admin')
+@api_login_required
+@api_role_required('staff')
 @validate_json_content_type
 @handle_errors
 def call_next_token_endpoint():
@@ -217,8 +255,8 @@ def call_next_token_endpoint():
     return jsonify(result)
 
 @staff_bp.route('/token/<int:token_id>/complete', methods=['PUT'])
-@login_required
-@role_required('staff', 'admin')
+@api_login_required
+@api_role_required('staff')
 @handle_errors
 def complete_token_endpoint(token_id):
     """Complete a token"""
@@ -244,8 +282,8 @@ def complete_token_endpoint(token_id):
     return jsonify(result)
 
 @staff_bp.route('/token/<int:token_id>', methods=['GET'])
-@login_required
-@role_required('staff', 'admin')
+@api_login_required
+@api_role_required('staff')
 @handle_errors
 def get_token_details(token_id):
     """Get token details"""
@@ -263,8 +301,8 @@ def get_token_details(token_id):
     })
 
 @staff_bp.route('/atm/<int:atm_id>', methods=['PUT'])
-@login_required
-@role_required('staff', 'admin')
+@api_login_required
+@api_role_required('staff')
 @validate_json_content_type
 @handle_errors
 def update_atm_status_endpoint(atm_id):
@@ -296,8 +334,8 @@ def update_atm_status_endpoint(atm_id):
     return jsonify(result)
 
 @staff_bp.route('/atm-status', methods=['GET'])
-@login_required
-@role_required('staff', 'admin')
+@api_login_required
+@api_role_required('staff')
 @handle_errors
 def get_atm_status():
     """Get ATM status"""
@@ -309,8 +347,8 @@ def get_atm_status():
     })
 
 @staff_bp.route('/analytics', methods=['GET'])
-@login_required
-@role_required('staff', 'admin')
+@api_login_required
+@api_role_required('staff')
 @handle_errors
 def get_staff_analytics():
     """Get staff analytics"""

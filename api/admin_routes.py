@@ -1,41 +1,167 @@
 from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
+from flask_login import current_user
 from modules.user_manager import (
     get_all_users, create_user, update_user, delete_user, reset_user_password,
     get_user_statistics, get_recent_users, search_users
 )
 from modules.analytics import get_comprehensive_analytics, get_dashboard_statistics
 from modules.chatbot_integration import update_chatbot_data, get_chatbot_statistics
-from utils.decorators import admin_required, validate_json_content_type, handle_errors
+from utils.decorators import validate_json_content_type, handle_errors
+from utils.api_decorators import api_login_required, api_role_required
 from utils.validators import validate_user_data, validate_pagination_params
 from utils.helpers import get_pagination_info
 from database import db
-from database.models import SystemLog
+from database.models import SystemLog, User, Token, ATMStatus
 from flask_socketio import emit
+from datetime import datetime, timedelta
+from sqlalchemy import func, and_
 
 admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/dashboard', methods=['GET'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @handle_errors
 def admin_dashboard():
     """Get comprehensive admin dashboard data"""
-    # Get dashboard statistics
-    stats = get_dashboard_statistics()
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    tomorrow = today + timedelta(days=1)
+    yesterday = today - timedelta(days=1)
+    thirty_days_ago = today - timedelta(days=30)
     
-    # Get comprehensive analytics
-    analytics = get_comprehensive_analytics(days=30)
+    # Total users
+    total_users = User.query.count()
+    users_this_month = User.query.filter(
+        User.created_at >= thirty_days_ago
+    ).count()
+    
+    # Tokens today
+    tokens_today = Token.query.filter(
+        and_(
+            Token.generated_at >= today,
+            Token.generated_at < tomorrow
+        )
+    ).count()
+    
+    tokens_yesterday = Token.query.filter(
+        and_(
+            Token.generated_at >= yesterday,
+            Token.generated_at < today
+        )
+    ).count()
+    
+    # Active staff
+    active_staff = User.query.filter(
+        and_(
+            User.role == 'staff',
+            User.status == 'active'
+        )
+    ).count()
+    
+    staff_online = User.query.filter(
+        and_(
+            User.role == 'staff',
+            User.status == 'active',
+            User.last_login >= datetime.utcnow() - timedelta(minutes=30)
+        )
+    ).count()
+    
+    # Average wait time
+    completed_today = Token.query.filter(
+        and_(
+            Token.generated_at >= today,
+            Token.status == 'completed',
+            Token.called_at.isnot(None),
+            Token.generated_at.isnot(None)
+        )
+    ).all()
+    
+    if completed_today:
+        total_wait = sum([
+            (token.called_at - token.generated_at).total_seconds() / 60
+            for token in completed_today
+        ])
+        avg_wait_time = round(total_wait / len(completed_today))
+        improvement = 0
+        if tokens_yesterday > 0:
+            improvement = round(((tokens_today - tokens_yesterday) / tokens_yesterday) * 100)
+    else:
+        avg_wait_time = 0
+        improvement = 0
+    
+    # Token generation trend (last 30 days)
+    token_trend = []
+    for i in range(30):
+        date = today - timedelta(days=29-i)
+        next_date = date + timedelta(days=1)
+        
+        count = Token.query.filter(
+            and_(
+                Token.generated_at >= date,
+                Token.generated_at < next_date
+            )
+        ).count()
+        
+        token_trend.append({
+            'date': date.strftime('%Y-%m-%d'),
+            'count': count
+        })
+    
+    # Service type distribution
+    service_distribution = db.session.query(
+        Token.service_type,
+        func.count(Token.token_id).label('count')
+    ).filter(
+        Token.generated_at >= thirty_days_ago
+    ).group_by(Token.service_type).all()
+    
+    # Staff performance
+    staff_performance = db.session.query(
+        User.full_name,
+        func.count(Token.token_id).label('tokens_handled'),
+        func.avg(
+            func.extract('epoch', Token.completed_at - Token.called_at) / 60
+        ).label('avg_service_time')
+    ).join(Token, User.user_id == Token.served_by).filter(
+        and_(
+            User.role == 'staff',
+            Token.status == 'completed',
+            Token.generated_at >= thirty_days_ago
+        )
+    ).group_by(User.user_id, User.full_name).limit(10).all()
+    
+    # ATM status
+    atm_status = ATMStatus.query.all()
     
     return jsonify({
         'status': 'success',
-        'statistics': stats,
-        'analytics': analytics
+        'total_users': total_users,
+        'users_this_month': users_this_month,
+        'tokens_today': tokens_today,
+        'tokens_yesterday': tokens_yesterday,
+        'active_staff': active_staff,
+        'staff_online': staff_online,
+        'avg_wait_time': avg_wait_time,
+        'improvement': improvement,
+        'token_trend': token_trend,
+        'service_distribution': [
+            {'service': s.service_type, 'count': s.count}
+            for s in service_distribution
+        ],
+        'staff_performance': [
+            {
+                'name': s.full_name,
+                'tokens_handled': s.tokens_handled,
+                'avg_service_time': round(s.avg_service_time) if s.avg_service_time else 0
+            }
+            for s in staff_performance
+        ],
+        'atm_status': [atm.to_dict() for atm in atm_status]
     })
 
 @admin_bp.route('/users', methods=['GET'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @handle_errors
 def get_users():
     """Get all users with filtering and pagination"""
@@ -72,8 +198,8 @@ def get_users():
     })
 
 @admin_bp.route('/users', methods=['POST'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @validate_json_content_type
 @handle_errors
 def create_user_endpoint():
@@ -103,8 +229,8 @@ def create_user_endpoint():
     return jsonify(result)
 
 @admin_bp.route('/users/<int:user_id>', methods=['PUT'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @validate_json_content_type
 @handle_errors
 def update_user_endpoint(user_id):
@@ -134,8 +260,8 @@ def update_user_endpoint(user_id):
     return jsonify(result)
 
 @admin_bp.route('/users/<int:user_id>', methods=['DELETE'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @handle_errors
 def delete_user_endpoint(user_id):
     """Delete user (soft delete)"""
@@ -147,8 +273,8 @@ def delete_user_endpoint(user_id):
     return jsonify(result)
 
 @admin_bp.route('/users/<int:user_id>/reset-password', methods=['PUT'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @validate_json_content_type
 @handle_errors
 def reset_user_password_endpoint(user_id):
@@ -171,8 +297,8 @@ def reset_user_password_endpoint(user_id):
     return jsonify(result)
 
 @admin_bp.route('/analytics', methods=['GET'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @handle_errors
 def get_analytics():
     """Get comprehensive analytics"""
@@ -193,8 +319,8 @@ def get_analytics():
     })
 
 @admin_bp.route('/analytics/tokens', methods=['GET'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @handle_errors
 def get_token_analytics():
     """Get token analytics"""
@@ -209,8 +335,8 @@ def get_token_analytics():
     })
 
 @admin_bp.route('/analytics/performance', methods=['GET'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @handle_errors
 def get_performance_analytics():
     """Get staff performance analytics"""
@@ -225,8 +351,8 @@ def get_performance_analytics():
     })
 
 @admin_bp.route('/system-logs', methods=['GET'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @handle_errors
 def get_system_logs():
     """Get system logs"""
@@ -289,8 +415,8 @@ def get_system_logs():
     })
 
 @admin_bp.route('/chatbot-data', methods=['PUT'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @validate_json_content_type
 @handle_errors
 def update_chatbot_data_endpoint():
@@ -327,8 +453,8 @@ def update_chatbot_data_endpoint():
     })
 
 @admin_bp.route('/chatbot-data/reload', methods=['POST'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @handle_errors
 def reload_chatbot_data():
     """Reload chatbot data from Excel"""
@@ -346,8 +472,8 @@ def reload_chatbot_data():
         }), 500
 
 @admin_bp.route('/chatbot/statistics', methods=['GET'])
-@login_required
-@admin_required
+@api_login_required
+@api_role_required('admin')
 @handle_errors
 def get_chatbot_statistics_endpoint():
     """Get chatbot statistics"""
