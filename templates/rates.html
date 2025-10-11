@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Interest Rates - Apex Bank{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 fw-bold text-center mb-5">Current Interest Rates</h1>
+            <p class="lead text-center text-muted mb-5">Competitive rates for all our banking products</p>
+        </div>
+    </div>
+
+    <!-- Deposit Rates -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-piggy-bank me-2"></i>Deposit Rates</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Account Type</th>
+                                    <th>Interest Rate (p.a.)</th>
+                                    <th>Minimum Balance</th>
+                                    <th>Features</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Savings Account</strong></td>
+                                    <td><span class="badge bg-success fs-6">4.5%</span></td>
+                                    <td>₹1,000</td>
+                                    <td>Daily interest, Online banking</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Current Account</strong></td>
+                                    <td><span class="badge bg-info fs-6">2.0%</span></td>
+                                    <td>₹5,000</td>
+                                    <td>Unlimited transactions</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fixed Deposit (1 Year)</strong></td>
+                                    <td><span class="badge bg-success fs-6">6.5%</span></td>
+                                    <td>₹10,000</td>
+                                    <td>Guaranteed returns</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fixed Deposit (3 Years)</strong></td>
+                                    <td><span class="badge bg-success fs-6">7.0%</span></td>
+                                    <td>₹10,000</td>
+                                    <td>Higher returns</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fixed Deposit (5 Years)</strong></td>
+                                    <td><span class="badge bg-success fs-6">7.5%</span></td>
+                                    <td>₹10,000</td>
+                                    <td>Maximum returns</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loan Rates -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0"><i class="fas fa-home me-2"></i>Loan Rates</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Loan Type</th>
+                                    <th>Interest Rate (p.a.)</th>
+                                    <th>Processing Fee</th>
+                                    <th>Maximum Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Home Loan</strong></td>
+                                    <td><span class="badge bg-primary fs-6">8.5% - 9.5%</span></td>
+                                    <td>0.5% of loan amount</td>
+                                    <td>₹2 Crores</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Personal Loan</strong></td>
+                                    <td><span class="badge bg-primary fs-6">10.5% - 15.5%</span></td>
+                                    <td>2% of loan amount</td>
+                                    <td>₹25 Lakhs</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Auto Loan</strong></td>
+                                    <td><span class="badge bg-primary fs-6">9.0% - 12.0%</span></td>
+                                    <td>₹2,000 - ₹5,000</td>
+                                    <td>₹50 Lakhs</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Education Loan</strong></td>
+                                    <td><span class="badge bg-primary fs-6">8.0% - 12.0%</span></td>
+                                    <td>₹1,000</td>
+                                    <td>₹1 Crore</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Business Loan</strong></td>
+                                    <td><span class="badge bg-primary fs-6">11.0% - 16.0%</span></td>
+                                    <td>1% of loan amount</td>
+                                    <td>₹1 Crore</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Credit Card Rates -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0"><i class="fas fa-credit-card me-2"></i>Credit Card Rates</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Card Type</th>
+                                    <th>Interest Rate (p.a.)</th>
+                                    <th>Annual Fee</th>
+                                    <th>Reward Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Classic Credit Card</strong></td>
+                                    <td><span class="badge bg-warning fs-6">24%</span></td>
+                                    <td>₹500</td>
+                                    <td>1 point per ₹100</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Gold Credit Card</strong></td>
+                                    <td><span class="badge bg-warning fs-6">22%</span></td>
+                                    <td>₹1,500</td>
+                                    <td>2 points per ₹100</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Platinum Credit Card</strong></td>
+                                    <td><span class="badge bg-warning fs-6">20%</span></td>
+                                    <td>₹3,000</td>
+                                    <td>3 points per ₹100</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Premium Credit Card</strong></td>
+                                    <td><span class="badge bg-warning fs-6">18%</span></td>
+                                    <td>₹5,000</td>
+                                    <td>5 points per ₹100</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Important Notes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle me-2"></i>Important Notes</h5>
+                <ul class="mb-0">
+                    <li>Interest rates are subject to change based on market conditions and RBI guidelines.</li>
+                    <li>Actual rates may vary based on individual credit profile and other factors.</li>
+                    <li>Processing fees and charges may apply as per bank's terms and conditions.</li>
+                    <li>For the most current rates, please contact our nearest branch or call our customer service.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <h3 class="mb-4">Need More Information?</h3>
+            <p class="lead mb-4">Our relationship managers are here to help you choose the right product.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login to Apply
+                </a>
+                <a href="{{ url_for('contact') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-phone me-2"></i>Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

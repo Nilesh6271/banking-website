@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - Apex Bank{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 fw-bold text-center mb-5">Contact Us</h1>
+            <p class="lead text-center text-muted mb-5">We're here to help you with all your banking needs</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Contact Information -->
+        <div class="col-lg-6 mb-5">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-phone me-2"></i>Get in Touch</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-phone fa-2x text-primary me-3"></i>
+                                <div>
+                                    <h5>Phone Support</h5>
+                                    <p class="mb-1"><strong>Customer Service:</strong> 1800-123-4567</p>
+                                    <p class="mb-1"><strong>24/7 Helpline:</strong> 1800-987-6543</p>
+                                    <p class="mb-0"><strong>Emergency:</strong> 1800-999-8888</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-4">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-envelope fa-2x text-primary me-3"></i>
+                                <div>
+                                    <h5>Email Support</h5>
+                                    <p class="mb-1"><strong>General Inquiries:</strong> info@apexbank.com</p>
+                                    <p class="mb-1"><strong>Customer Support:</strong> support@apexbank.com</p>
+                                    <p class="mb-0"><strong>Complaints:</strong> complaints@apexbank.com</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-4">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-map-marker-alt fa-2x text-primary me-3"></i>
+                                <div>
+                                    <h5>Head Office</h5>
+                                    <p class="mb-0">
+                                        Apex Bank Limited<br>
+                                        123 Financial District<br>
+                                        Mumbai, Maharashtra 400001<br>
+                                        India
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-clock fa-2x text-primary me-3"></i>
+                                <div>
+                                    <h5>Working Hours</h5>
+                                    <p class="mb-1"><strong>Branch Hours:</strong> 9:00 AM - 5:00 PM (Mon-Fri)</p>
+                                    <p class="mb-1"><strong>ATM Services:</strong> 24/7</p>
+                                    <p class="mb-0"><strong>Online Banking:</strong> 24/7</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="col-lg-6 mb-5">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Send us a Message</h3>
+                </div>
+                <div class="card-body">
+                    <form id="contactForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="firstName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <select class="form-select" id="subject" required>
+                                <option value="">Select a subject</option>
+                                <option value="account">Account Related</option>
+                                <option value="loan">Loan Inquiry</option>
+                                <option value="credit-card">Credit Card</option>
+                                <option value="technical">Technical Support</option>
+                                <option value="complaint">Complaint</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" rows="4" required></textarea>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">
+                                I agree to the <a href="#" class="text-primary">Terms and Conditions</a>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Locations -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Branch Locations</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Main Branch</h5>
+                                    <p class="card-text">
+                                        123 Financial District<br>
+                                        Mumbai, Maharashtra 400001<br>
+                                        <strong>Phone:</strong> 022-1234-5678
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Delhi Branch</h5>
+                                    <p class="card-text">
+                                        456 Connaught Place<br>
+                                        New Delhi, Delhi 110001<br>
+                                        <strong>Phone:</strong> 011-2345-6789
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Bangalore Branch</h5>
+                                    <p class="card-text">
+                                        789 MG Road<br>
+                                        Bangalore, Karnataka 560001<br>
+                                        <strong>Phone:</strong> 080-3456-7890
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0"><i class="fas fa-question-circle me-2"></i>Frequently Asked Questions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    How do I open a new account?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    You can open a new account by visiting any of our branches with the required documents (PAN card, Aadhaar card, address proof, and income proof). You can also start the process online through our website.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    What are the interest rates for savings accounts?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Our savings accounts offer competitive interest rates starting from 4.5% per annum. The exact rate depends on your account balance and type of account.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    How can I apply for a loan?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    You can apply for a loan online through our website, visit any branch, or call our customer service. We offer home loans, personal loans, auto loans, and business loans with competitive rates.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                    Is online banking safe?
+                                </button>
+                            </h2>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes, our online banking platform uses advanced encryption and security measures to protect your information. We also offer two-factor authentication and SMS alerts for all transactions.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const formData = {
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            subject: document.getElementById('subject').value,
+            message: document.getElementById('message').value
+        };
+        
+        // Simulate form submission
+        showNotification('Thank you for your message! We will get back to you soon.', 'success');
+        
+        // Reset form
+        this.reset();
+    });
+</script>
+{% endblock %}

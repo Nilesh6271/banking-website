@@ -1,0 +1,587 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard - Apex Bank{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        transition: transform 0.2s;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .token-card {
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .atm-card {
+        border-left: 4px solid var(--success-color);
+    }
+    
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .service-type {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    .wait-time {
+        color: var(--warning-color);
+        font-weight: 600;
+    }
+    
+    .queue-item {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .queue-item:hover {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-tachometer-alt me-2"></i>Staff Dashboard</h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="refreshData()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                    <button class="btn btn-success" onclick="callNextToken()">
+                        <i class="fas fa-bullhorn me-1"></i>Call Next Token
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card dashboard-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                    <h5 class="card-title">Waiting</h5>
+                    <h3 class="text-warning" id="waitingCount">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card dashboard-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-play fa-2x text-primary mb-2"></i>
+                    <h5 class="card-title">In Progress</h5>
+                    <h3 class="text-primary" id="inProgressCount">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card dashboard-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-check fa-2x text-success mb-2"></i>
+                    <h5 class="card-title">Completed</h5>
+                    <h3 class="text-success" id="completedCount">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card dashboard-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-credit-card fa-2x text-info mb-2"></i>
+                    <h5 class="card-title">ATMs</h5>
+                    <h3 class="text-info" id="atmsCount">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Token Queue -->
+        <div class="col-md-6">
+            <div class="card token-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Token Queue</h5>
+                </div>
+                <div class="card-body">
+                    <div id="tokenQueueList">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-spinner fa-spin"></i> Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ATM Management -->
+        <div class="col-md-6">
+            <div class="card atm-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>ATM Management</h5>
+                </div>
+                <div class="card-body">
+                    <div id="atmManagementList">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-spinner fa-spin"></i> Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- In Progress Tokens -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-play me-2"></i>Tokens In Progress</h5>
+                </div>
+                <div class="card-body">
+                    <div id="inProgressTokensList">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-spinner fa-spin"></i> Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call Token Modal -->
+<div class="modal fade" id="callTokenModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-bullhorn me-2"></i>Call Token</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="callTokenForm">
+                    <div class="mb-3">
+                        <label for="counterNumber" class="form-label">Counter Number</label>
+                        <input type="text" class="form-control" id="counterNumber" value="Counter 1" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="callToken()">
+                    <i class="fas fa-bullhorn me-1"></i>Call Token
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update ATM Modal -->
+<div class="modal fade" id="updateATMModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-credit-card me-2"></i>Update ATM Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateATMForm">
+                    <input type="hidden" id="atmId">
+                    <div class="mb-3">
+                        <label for="atmStatus" class="form-label">Status</label>
+                        <select class="form-select" id="atmStatus" required>
+                            <option value="operational">Operational</option>
+                            <option value="out_of_service">Out of Service</option>
+                            <option value="low_cash">Low Cash</option>
+                            <option value="under_maintenance">Under Maintenance</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="queueLength" class="form-label">Queue Length</label>
+                        <input type="number" class="form-control" id="queueLength" min="0" value="0">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="cashAvailable" checked>
+                        <label class="form-check-label" for="cashAvailable">Cash Available</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="atmNotes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="atmNotes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="updateATM()">
+                    <i class="fas fa-save me-1"></i>Update ATM
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let dashboardData = null;
+    let selectedTokenId = null;
+    let selectedATMId = null;
+    
+    // Load dashboard data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDashboardData();
+        
+        // Set up WebSocket listeners
+        setupWebSocketListeners();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadDashboardData, 30000);
+    });
+    
+    function loadDashboardData() {
+        fetch(`${API_BASE}/api/staff/dashboard`, {
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                dashboardData = data;
+                updateDashboard(data);
+            } else {
+                showNotification('Failed to load dashboard data', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading dashboard:', error);
+            showNotification('Connection error', 'error');
+        });
+    }
+    
+    function updateDashboard(data) {
+        // Update statistics
+        document.getElementById('waitingCount').textContent = data.stats.waiting;
+        document.getElementById('inProgressCount').textContent = data.stats.in_progress;
+        document.getElementById('completedCount').textContent = data.stats.completed;
+        document.getElementById('atmsCount').textContent = data.atm_status.length;
+        
+        // Update token queue
+        updateTokenQueueList(data.waiting_tokens);
+        
+        // Update ATM management
+        updateATMManagementList(data.atm_status);
+        
+        // Update in-progress tokens
+        updateInProgressTokensList(data.in_progress_tokens);
+    }
+    
+    function updateTokenQueueList(tokens) {
+        const container = document.getElementById('tokenQueueList');
+        
+        if (tokens.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted">No tokens in queue</div>';
+            return;
+        }
+        
+        container.innerHTML = tokens.map((token, index) => `
+            <div class="queue-item d-flex justify-content-between align-items-center mb-2 p-2 border rounded" onclick="selectToken(${token.token_id})">
+                <div>
+                    <div class="fw-bold">${token.token_number}</div>
+                    <div class="service-type">${formatServiceType(token.service_type)}</div>
+                    <div class="text-muted small">${token.customer_name}</div>
+                </div>
+                <div class="text-end">
+                    <span class="badge status-badge status-${token.status}">${formatStatus(token.status)}</span>
+                    ${token.estimated_wait_time ? `<div class="wait-time">${token.estimated_wait_time} min</div>` : ''}
+                    <div class="small text-muted">#${index + 1}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    function updateATMManagementList(atms) {
+        const container = document.getElementById('atmManagementList');
+        
+        container.innerHTML = atms.map(atm => `
+            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                <div>
+                    <div class="fw-bold">${atm.atm_name}</div>
+                    <div class="text-muted small">${atm.location}</div>
+                    ${atm.queue_length > 0 ? `<div class="small text-warning">Queue: ${atm.queue_length}</div>` : ''}
+                </div>
+                <div class="text-end">
+                    <span class="badge status-badge ${getATMStatusClass(atm.status)}">${formatATMStatus(atm.status)}</span>
+                    <button class="btn btn-sm btn-outline-primary mt-1" onclick="openUpdateATMModal(${atm.atm_id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    function updateInProgressTokensList(tokens) {
+        const container = document.getElementById('inProgressTokensList');
+        
+        if (tokens.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted">No tokens in progress</div>';
+            return;
+        }
+        
+        container.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Counter</th>
+                            <th>Called At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tokens.map(token => `
+                            <tr>
+                                <td><strong>${token.token_number}</strong></td>
+                                <td>${token.customer_name}</td>
+                                <td>${formatServiceType(token.service_type)}</td>
+                                <td>${token.counter_number || '-'}</td>
+                                <td>${formatDateTime(token.called_at)}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-success" onclick="completeToken(${token.token_id})">
+                                        <i class="fas fa-check"></i> Complete
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+    
+    function selectToken(tokenId) {
+        selectedTokenId = tokenId;
+        document.getElementById('callTokenModal').style.display = 'block';
+        new bootstrap.Modal(document.getElementById('callTokenModal')).show();
+    }
+    
+    function callToken() {
+        if (!selectedTokenId) {
+            showNotification('Please select a token first', 'error');
+            return;
+        }
+        
+        const counterNumber = document.getElementById('counterNumber').value;
+        
+        fetch(`${API_BASE}/api/staff/token/${selectedTokenId}/call`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                counter_number: counterNumber
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showNotification(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('callTokenModal')).hide();
+                loadDashboardData();
+            } else {
+                showNotification(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error calling token:', error);
+            showNotification('Failed to call token', 'error');
+        });
+    }
+    
+    function callNextToken() {
+        const counterNumber = prompt('Enter counter number:', 'Counter 1');
+        if (!counterNumber) return;
+        
+        fetch(`${API_BASE}/api/staff/token/next`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                counter_number: counterNumber
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showNotification(data.message, 'success');
+                loadDashboardData();
+            } else {
+                showNotification(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error calling next token:', error);
+            showNotification('Failed to call next token', 'error');
+        });
+    }
+    
+    function completeToken(tokenId) {
+        if (!confirm('Are you sure you want to complete this token?')) {
+            return;
+        }
+        
+        fetch(`${API_BASE}/api/staff/token/${tokenId}/complete`, {
+            method: 'PUT',
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showNotification(data.message, 'success');
+                loadDashboardData();
+            } else {
+                showNotification(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error completing token:', error);
+            showNotification('Failed to complete token', 'error');
+        });
+    }
+    
+    function openUpdateATMModal(atmId) {
+        selectedATMId = atmId;
+        const atm = dashboardData.atm_status.find(a => a.atm_id === atmId);
+        
+        if (atm) {
+            document.getElementById('atmId').value = atmId;
+            document.getElementById('atmStatus').value = atm.status;
+            document.getElementById('queueLength').value = atm.queue_length;
+            document.getElementById('cashAvailable').checked = atm.cash_available;
+            document.getElementById('atmNotes').value = atm.notes || '';
+        }
+        
+        new bootstrap.Modal(document.getElementById('updateATMModal')).show();
+    }
+    
+    function updateATM() {
+        if (!selectedATMId) {
+            showNotification('Please select an ATM first', 'error');
+            return;
+        }
+        
+        const status = document.getElementById('atmStatus').value;
+        const queueLength = parseInt(document.getElementById('queueLength').value);
+        const cashAvailable = document.getElementById('cashAvailable').checked;
+        const notes = document.getElementById('atmNotes').value;
+        
+        fetch(`${API_BASE}/api/staff/atm/${selectedATMId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                status: status,
+                queue_length: queueLength,
+                cash_available: cashAvailable,
+                notes: notes
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showNotification(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('updateATMModal')).hide();
+                loadDashboardData();
+            } else {
+                showNotification(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error updating ATM:', error);
+            showNotification('Failed to update ATM', 'error');
+        });
+    }
+    
+    function refreshData() {
+        loadDashboardData();
+        showNotification('Data refreshed', 'success');
+    }
+    
+    function setupWebSocketListeners() {
+        socket.on('token_generated', (data) => {
+            showNotification(`New token generated: ${data.token.token_number}`, 'info');
+            loadDashboardData();
+        });
+        
+        socket.on('token_updated', (data) => {
+            showNotification(`Token ${data.token.token_number} status updated`, 'info');
+            loadDashboardData();
+        });
+        
+        socket.on('atm_status_updated', (data) => {
+            showNotification(`ATM ${data.atm.atm_name} status updated`, 'info');
+            loadDashboardData();
+        });
+    }
+    
+    // Utility functions
+    function formatServiceType(serviceType) {
+        const types = {
+            'cash_deposit': 'Cash Deposit',
+            'general_query': 'General Query',
+            'loan_application': 'Loan Application',
+            'meet_gm': 'Meet GM'
+        };
+        return types[serviceType] || serviceType;
+    }
+    
+    function formatStatus(status) {
+        const statuses = {
+            'waiting': 'Waiting',
+            'in_progress': 'In Progress',
+            'completed': 'Completed',
+            'cancelled': 'Cancelled'
+        };
+        return statuses[status] || status;
+    }
+    
+    function formatATMStatus(status) {
+        const statuses = {
+            'operational': 'Operational',
+            'out_of_service': 'Out of Service',
+            'low_cash': 'Low Cash',
+            'under_maintenance': 'Under Maintenance'
+        };
+        return statuses[status] || status;
+    }
+    
+    function getATMStatusClass(status) {
+        const classes = {
+            'operational': 'bg-success',
+            'out_of_service': 'bg-danger',
+            'low_cash': 'bg-warning',
+            'under_maintenance': 'bg-info'
+        };
+        return classes[status] || 'bg-secondary';
+    }
+    
+    function formatDateTime(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    }
+</script>
+{% endblock %}

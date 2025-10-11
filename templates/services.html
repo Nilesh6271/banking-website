@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Services - Apex Bank{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 fw-bold text-center mb-5">Our Banking Services</h1>
+            <p class="lead text-center text-muted mb-5">Comprehensive financial solutions tailored to your needs</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-piggy-bank fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Savings Accounts</h5>
+                    <p class="card-text">Start your savings journey with our high-yield savings accounts. Competitive interest rates and flexible terms.</p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>High interest rates</li>
+                        <li><i class="fas fa-check text-success me-2"></i>No minimum balance</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Online banking access</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-credit-card fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Credit Cards</h5>
+                    <p class="card-text">Enjoy flexible spending with our range of credit cards designed for every lifestyle and need.</p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Reward points program</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Low interest rates</li>
+                        <li><i class="fas fa-check text-success me-2"></i>24/7 customer support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-home fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Home Loans</h5>
+                    <p class="card-text">Make your dream home a reality with our competitive home loan rates and flexible repayment options.</p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Competitive rates</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Flexible terms</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Quick approval</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-car fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Auto Loans</h5>
+                    <p class="card-text">Drive away with your dream car with our attractive auto loan options and quick processing.</p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Low down payment</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Flexible EMI options</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Quick processing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Investment Services</h5>
+                    <p class="card-text">Grow your wealth with our expert investment advisory and portfolio management services.</p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Expert advisory</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Diversified portfolios</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Regular monitoring</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-briefcase fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Business Banking</h5>
+                    <p class="card-text">Comprehensive banking solutions for businesses of all sizes with dedicated relationship managers.</p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Business accounts</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Working capital loans</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Trade finance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <h3 class="mb-4">Ready to Get Started?</h3>
+            <p class="lead mb-4">Contact us today to learn more about our services and how we can help you achieve your financial goals.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login to Apply
+                </a>
+                <a href="{{ url_for('contact') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-phone me-2"></i>Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
