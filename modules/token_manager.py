@@ -1,4 +1,5 @@
-from database.models import Token, User, db
+from database import db
+from database.models import Token, User
 from flask_socketio import emit
 from datetime import datetime, date
 from utils.helpers import calculate_wait_time, generate_token_number

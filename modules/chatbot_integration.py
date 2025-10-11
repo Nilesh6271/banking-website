@@ -2,7 +2,8 @@ import sys
 import os
 import json
 from datetime import datetime
-from database.models import ChatLog, ChatbotFAQ, db
+from database import db
+from database.models import ChatLog, ChatbotFAQ
 from config import Config
 
 # Global chatbot instance
@@ -21,11 +22,11 @@ def initialize_chatbot(excel_path):
         # Import chatbot data into database
         import_chatbot_data(excel_path)
         
-        print("✓ Chatbot initialized successfully")
+        print("Chatbot initialized successfully")
         return True
         
     except Exception as e:
-        print(f"✗ Chatbot initialization failed: {str(e)}")
+        print(f"Chatbot initialization failed: {str(e)}")
         return False
 
 def import_chatbot_data(excel_path):
@@ -56,16 +57,16 @@ def import_chatbot_data(excel_path):
                     )
                     db.session.add(faq)
                 
-                print(f"✓ Imported {sheet} data")
+                print(f"Imported {sheet} data")
                 
             except Exception as e:
-                print(f"✗ Error importing {sheet}: {str(e)}")
+                print(f"Error importing {sheet}: {str(e)}")
         
         db.session.commit()
-        print("✓ Chatbot data imported successfully")
+        print("Chatbot data imported successfully")
         
     except Exception as e:
-        print(f"✗ Error importing chatbot data: {str(e)}")
+        print(f"Error importing chatbot data: {str(e)}")
         raise
 
 def get_chatbot_response(query, user_id=None, session_id=None):

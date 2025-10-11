@@ -1,4 +1,5 @@
-from database.models import User, SystemLog, db
+from database import db
+from database.models import User, SystemLog
 from flask_login import current_user
 from utils.helpers import get_client_ip
 from datetime import datetime
@@ -88,7 +89,7 @@ def create_user(user_data, created_by=None):
         user_id=created_by.user_id if created_by else None,
         action='user_created',
         details=f'Created user {user_data["username"]} with role {user_data["role"]}',
-        ip_address=get_client_ip(),
+        ip_address='127.0.0.1',  # Default IP for system operations
         timestamp=datetime.utcnow()
     )
     db.session.add(log_entry)

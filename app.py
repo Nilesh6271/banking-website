@@ -1,5 +1,4 @@
 from flask import Flask, render_template, redirect, url_for, request
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_socketio import SocketIO
 from flask_cors import CORS
@@ -8,11 +7,13 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 from datetime import datetime
+from functools import wraps
 
-# Database models will be imported inside app context
+# Import db from database package (not from models)
+from database import db, init_db
+from database.models import User
 
 # Initialize extensions
-db = SQLAlchemy()
 login_manager = LoginManager()
 socketio = SocketIO()
 cors = CORS()
@@ -21,42 +22,27 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     
-    # Initialize extensions with app
-    db.init_app(app)
-    login_manager.init_app(app)
-    socketio.init_app(app, 
-                     cors_allowed_origins=app.config['SOCKETIO_CORS_ALLOWED_ORIGINS'],
-                     async_mode=app.config['SOCKETIO_ASYNC_MODE'])
-    cors.init_app(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}})
+    # Initialize database
+    init_db(app)
     
-    # Configure login manager
-    login_manager.login_view = 'auth.login'
+    # Initialize other extensions
+    login_manager.init_app(app)
+    login_manager.login_view = 'login'
     login_manager.login_message = 'Please log in to access this page.'
-    login_manager.login_message_category = 'info'
+    
+    socketio.init_app(
+        app, 
+        cors_allowed_origins=app.config['SOCKETIO_CORS_ALLOWED_ORIGINS'],
+        async_mode=app.config['SOCKETIO_ASYNC_MODE']
+    )
+    
+    CORS(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}})
     
     # Setup logging
     setup_logging(app)
     
-    # Create database tables
+    # Create default data
     with app.app_context():
-        # Ensure database directory exists
-        db_dir = os.path.dirname(app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', ''))
-        if db_dir and not os.path.exists(db_dir):
-            os.makedirs(db_dir, exist_ok=True)
-        
-        db.create_all()
-        
-        # Import models after db.create_all()
-        from database.models import User, Token, ATMStatus, ChatbotFAQ, ChatLog, SystemLog
-        
-        # Make models available globally
-        globals()['User'] = User
-        globals()['Token'] = Token
-        globals()['ATMStatus'] = ATMStatus
-        globals()['ChatbotFAQ'] = ChatbotFAQ
-        globals()['ChatLog'] = ChatLog
-        globals()['SystemLog'] = SystemLog
-        
         create_default_admin()
         initialize_atm_status()
         import_chatbot_data()
@@ -86,8 +72,12 @@ def create_app(config_class=Config):
     register_page_routes(app)
     
     # Initialize chatbot
-    from modules.chatbot_integration import initialize_chatbot
-    initialize_chatbot(app.config['CHATBOT_EXCEL_PATH'])
+    with app.app_context():
+        try:
+            from modules.chatbot_integration import initialize_chatbot
+            initialize_chatbot(app.config['CHATBOT_EXCEL_PATH'])
+        except Exception as e:
+            app.logger.warning(f"Chatbot initialization failed: {str(e)}")
     
     app.logger.info('Bank Management Server started successfully')
     
@@ -128,10 +118,11 @@ def create_default_admin():
         )
         db.session.add(admin)
         db.session.commit()
-        print("✓ Default admin created - Username: admin, Password: admin123")
+        print("Default admin created - Username: admin, Password: admin123")
 
 def initialize_atm_status():
     """Initialize ATM status data"""
+    from database.models import ATMStatus
     
     if ATMStatus.query.count() == 0:
         atms = [
@@ -141,10 +132,11 @@ def initialize_atm_status():
         ]
         db.session.add_all(atms)
         db.session.commit()
-        print("✓ ATM status initialized")
+        print("ATM status initialized")
 
 def import_chatbot_data():
     """Import chatbot data from Excel into database"""
+    from database.models import ChatbotFAQ
     import pandas as pd
     import json
     
@@ -166,7 +158,7 @@ def import_chatbot_data():
                     db.session.commit()
                 except Exception as e:
                     print(f"Error importing {sheet}: {str(e)}")
-            print("✓ Chatbot data imported")
+            print("Chatbot data imported")
         else:
             print(f"Excel file not found: {excel_path}")
 

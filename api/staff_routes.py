@@ -11,7 +11,8 @@ from modules.analytics import get_staff_performance, get_token_statistics
 from utils.decorators import role_required, validate_json_content_type, handle_errors
 from utils.validators import validate_atm_data, validate_pagination_params
 from utils.helpers import get_pagination_info
-from database.models import Token, db
+from database import db
+from database.models import Token
 from flask_socketio import emit
 
 staff_bp = Blueprint('staff', __name__)

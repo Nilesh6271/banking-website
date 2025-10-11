@@ -1,4 +1,5 @@
-from database.models import ATMStatus, db
+from database import db
+from database.models import ATMStatus
 from flask_socketio import emit
 from datetime import datetime
 

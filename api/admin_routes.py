@@ -9,7 +9,8 @@ from modules.chatbot_integration import update_chatbot_data, get_chatbot_statist
 from utils.decorators import admin_required, validate_json_content_type, handle_errors
 from utils.validators import validate_user_data, validate_pagination_params
 from utils.helpers import get_pagination_info
-from database.models import SystemLog, db
+from database import db
+from database.models import SystemLog
 from flask_socketio import emit
 
 admin_bp = Blueprint('admin', __name__)

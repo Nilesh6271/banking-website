@@ -1,4 +1,5 @@
-from database.models import Token, User, ATMStatus, SystemLog, db
+from database import db
+from database.models import Token, User, ATMStatus, SystemLog
 from datetime import datetime, timedelta
 from sqlalchemy import func, extract
 from utils.helpers import get_date_range

@@ -6,7 +6,8 @@ from modules.analytics import get_token_statistics
 from utils.decorators import role_required, validate_json_content_type, handle_errors
 from utils.validators import validate_token_data, validate_pagination_params
 from utils.helpers import get_pagination_info
-from database.models import Token, db
+from database import db
+from database.models import Token
 from flask_socketio import emit
 
 customer_bp = Blueprint('customer', __name__)

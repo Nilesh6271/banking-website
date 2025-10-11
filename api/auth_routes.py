@@ -1,8 +1,12 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
+from database import db
+from database.models import User, SystemLog
 from modules.auth import authenticate_user, login_user_session, logout_user_session, change_password, get_user_session
 from utils.decorators import validate_json_content_type, handle_errors
 from utils.validators import validate_required_fields
+import bcrypt
+from datetime import datetime
 
 auth_bp = Blueprint('auth', __name__)
 
