@@ -4,6 +4,7 @@ from database import db
 from database.models import User, SystemLog
 from modules.auth import authenticate_user, login_user_session, logout_user_session, change_password, get_user_session
 from utils.decorators import validate_json_content_type, handle_errors
+from utils.api_decorators import api_login_required
 from utils.validators import validate_required_fields
 import bcrypt
 from datetime import datetime
@@ -49,7 +50,7 @@ def login():
         }), 401
 
 @auth_bp.route('/logout', methods=['POST'])
-@login_required
+@api_login_required
 @handle_errors
 def logout():
     """User logout endpoint"""
@@ -64,7 +65,7 @@ def session():
     return jsonify(result)
 
 @auth_bp.route('/change-password', methods=['POST'])
-@login_required
+@api_login_required
 @validate_json_content_type
 @handle_errors
 def change_user_password():
@@ -91,7 +92,7 @@ def change_user_password():
     return jsonify(result)
 
 @auth_bp.route('/profile', methods=['GET'])
-@login_required
+@api_login_required
 @handle_errors
 def get_profile():
     """Get user profile"""
@@ -101,7 +102,7 @@ def get_profile():
     })
 
 @auth_bp.route('/profile', methods=['PUT'])
-@login_required
+@api_login_required
 @validate_json_content_type
 @handle_errors
 def update_profile():
