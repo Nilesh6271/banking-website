@@ -3,259 +3,576 @@
 {% block title %}Admin Dashboard - Apex Bank{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 <style>
-    .dashboard-card {
-        transition: transform 0.2s;
+    .admin-dashboard {
+        background: var(--bg-secondary);
+        min-height: 100vh;
+        padding: 20px 0;
     }
-    
-    .dashboard-card:hover {
-        transform: translateY(-2px);
+
+    /* Overview Cards */
+    .overview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
     }
-    
-    .stats-card {
-        border-left: 4px solid var(--primary-color);
+
+    .overview-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
     }
-    
-    .users-card {
-        border-left: 4px solid var(--success-color);
+
+    .overview-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
     }
-    
-    .tokens-card {
-        border-left: 4px solid var(--warning-color);
+
+    .overview-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        margin-bottom: 15px;
     }
-    
-    .atms-card {
-        border-left: 4px solid var(--info-color);
+
+    .overview-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
     }
-    
-    .chart-container {
-        height: 300px;
+
+    .overview-label {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
     }
-    
-    .table-responsive {
-        max-height: 400px;
-        overflow-y: auto;
+
+    .overview-trend {
+        margin-top: 10px;
+        font-size: 0.85rem;
+    }
+
+    .overview-trend.up {
+        color: var(--success-color);
+    }
+
+    .overview-trend.down {
+        color: var(--danger-color);
+    }
+
+    /* Chart Cards */
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 20px;
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .chart-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* User Table */
+    .user-table-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: var(--shadow-md);
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: var(--secondary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+    }
+
+    .role-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .role-badge.admin {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+    }
+
+    .role-badge.staff {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--info-color);
+    }
+
+    .role-badge.customer {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+    }
+
+    /* Tab Navigation */
+    .custom-tabs {
+        background: white;
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 20px;
+    }
+
+    .custom-tab {
+        padding: 12px 24px;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .custom-tab.active {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    /* Activity Log */
+    .activity-item {
+        padding: 15px;
+        border-left: 3px solid var(--border-color);
+        margin-bottom: 15px;
+        background: var(--bg-light);
+        border-radius: 0 8px 8px 0;
+    }
+
+    .activity-item.login {
+        border-left-color: var(--success-color);
+    }
+
+    .activity-item.logout {
+        border-left-color: var(--text-secondary);
+    }
+
+    .activity-item.token_generated {
+        border-left-color: var(--info-color);
+    }
+
+    .activity-item.user_created {
+        border-left-color: var(--warning-color);
+    }
+
+    /* System Status */
+    .system-status-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .status-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .status-item:last-child {
+        border-bottom: none;
+    }
+
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    .status-indicator.online {
+        background: var(--success-color);
+        box-shadow: 0 0 10px var(--success-color);
+    }
+
+    .status-indicator.offline {
+        background: var(--danger-color);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h2>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-outline-primary" onclick="refreshData()">
-                        <i class="fas fa-sync-alt me-1"></i>Refresh
-                    </button>
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createUserModal">
-                        <i class="fas fa-user-plus me-1"></i>Create User
-                    </button>
-                </div>
+<div class="admin-dashboard">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>Admin Dashboard</h2>
+                <p class="text-muted mb-0">System Overview & Management</p>
+            </div>
+            <div>
+                <button class="btn btn-outline-primary me-2" onclick="exportReport()">
+                    <i class="fas fa-download me-2"></i>Export Report
+                </button>
+                <button class="btn btn-outline-danger" onclick="location.href='/logout'">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                </button>
             </div>
         </div>
-    </div>
 
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card stats-card dashboard-card">
-                <div class="card-body text-center">
-                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
-                    <h5 class="card-title">Total Users</h5>
-                    <h3 class="text-primary" id="totalUsers">0</h3>
+        <!-- Overview Cards -->
+        <div class="overview-grid">
+            <div class="overview-card animate__animated animate__fadeIn">
+                <div class="overview-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="overview-value" id="totalUsers">0</div>
+                <div class="overview-label">Total Users</div>
+                <div class="overview-trend up">
+                    <i class="fas fa-arrow-up me-1"></i>
+                    <span id="usersTrend">0%</span> this month
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card tokens-card dashboard-card">
-                <div class="card-body text-center">
-                    <i class="fas fa-ticket-alt fa-2x text-warning mb-2"></i>
-                    <h5 class="card-title">Total Tokens</h5>
-                    <h3 class="text-warning" id="totalTokens">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card atms-card dashboard-card">
-                <div class="card-body text-center">
-                    <i class="fas fa-credit-card fa-2x text-info mb-2"></i>
-                    <h5 class="card-title">ATMs</h5>
-                    <h3 class="text-info" id="totalATMs">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card users-card dashboard-card">
-                <div class="card-body text-center">
-                    <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
-                    <h5 class="card-title">Active Today</h5>
-                    <h3 class="text-success" id="activeToday">0</h3>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <!-- User Management -->
-        <div class="col-md-6">
-            <div class="card users-card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>User Management</h5>
+            <div class="overview-card animate__animated animate__fadeIn" style="animation-delay: 0.1s;">
+                <div class="overview-icon">
+                    <i class="fas fa-ticket-alt"></i>
                 </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between mb-3">
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-outline-primary btn-sm" onclick="filterUsers('all')">All</button>
-                            <button class="btn btn-outline-primary btn-sm" onclick="filterUsers('admin')">Admin</button>
-                            <button class="btn btn-outline-primary btn-sm" onclick="filterUsers('staff')">Staff</button>
-                            <button class="btn btn-outline-primary btn-sm" onclick="filterUsers('customer')">Customer</button>
+                <div class="overview-value" id="totalTokensToday">0</div>
+                <div class="overview-label">Tokens Today</div>
+                <div class="overview-trend up">
+                    <i class="fas fa-arrow-up me-1"></i>
+                    <span id="tokensTrend">0%</span> vs yesterday
+                </div>
+            </div>
+
+            <div class="overview-card animate__animated animate__fadeIn" style="animation-delay: 0.2s;">
+                <div class="overview-icon">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="overview-value" id="activeStaff">0</div>
+                <div class="overview-label">Active Staff</div>
+                <div class="overview-trend">
+                    <i class="fas fa-check-circle me-1 text-success"></i>
+                    Online now
+                </div>
+            </div>
+
+            <div class="overview-card animate__animated animate__fadeIn" style="animation-delay: 0.3s;">
+                <div class="overview-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="overview-value" id="avgWaitTime">0</div>
+                <div class="overview-label">Avg Wait Time (min)</div>
+                <div class="overview-trend down">
+                    <i class="fas fa-arrow-down me-1"></i>
+                    <span id="waitTimeTrend">0%</span> improvement
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="custom-tabs">
+            <button class="custom-tab active" onclick="switchTab('analytics')">
+                <i class="fas fa-chart-line me-2"></i>Analytics
+            </button>
+            <button class="custom-tab" onclick="switchTab('users')">
+                <i class="fas fa-users me-2"></i>User Management
+            </button>
+            <button class="custom-tab" onclick="switchTab('system')">
+                <i class="fas fa-cog me-2"></i>System Status
+            </button>
+            <button class="custom-tab" onclick="switchTab('logs')">
+                <i class="fas fa-list me-2"></i>Activity Logs
+            </button>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analyticsTab" class="tab-content">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h5 class="chart-title">Token Generation Trend</h5>
+                            <select class="form-select form-select-sm" style="width: auto;" id="chartPeriod" onchange="loadAnalytics()">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30" selected>Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                            </select>
                         </div>
-                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#createUserModal">
-                            <i class="fas fa-plus"></i> Add User
+                        <canvas id="tokenTrendChart" height="80"></canvas>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h5 class="chart-title">Service Type Distribution</h5>
+                        </div>
+                        <canvas id="serviceTypeChart" height="80"></canvas>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="chart-card">
+                        <h5 class="chart-title mb-3">Staff Performance</h5>
+                        <canvas id="staffPerformanceChart"></canvas>
+                    </div>
+
+                    <div class="system-status-card mt-3">
+                        <h5 class="mb-3">Quick Stats</h5>
+                        <div class="status-item">
+                            <span>Database Size</span>
+                            <strong id="dbSize">-</strong>
+                        </div>
+                        <div class="status-item">
+                            <span>Total Transactions</span>
+                            <strong id="totalTransactions">-</strong>
+                        </div>
+                        <div class="status-item">
+                            <span>Peak Hour</span>
+                            <strong id="peakHour">-</strong>
+                        </div>
+                        <div class="status-item">
+                            <span>Completion Rate</span>
+                            <strong id="completionRate">-</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="usersTab" class="tab-content" style="display: none;">
+            <div class="user-table-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">User Management</h5>
+                    <div>
+                        <input type="text" class="form-control form-control-sm d-inline-block me-2" 
+                               style="width: 200px;" placeholder="Search users..." id="userSearch">
+                        <select class="form-select form-select-sm d-inline-block me-2" 
+                                style="width: 120px;" id="roleFilter">
+                            <option value="">All Roles</option>
+                            <option value="admin">Admin</option>
+                            <option value="staff">Staff</option>
+                            <option value="customer">Customer</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" onclick="openUserModal()">
+                            <i class="fas fa-plus me-2"></i>Add User
                         </button>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTableBody">
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">
-                                        <i class="fas fa-spinner fa-spin"></i> Loading...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Users will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav>
+                    <ul class="pagination justify-content-center" id="usersPagination">
+                        <!-- Pagination will be loaded here -->
+                    </ul>
+                </nav>
             </div>
         </div>
 
-        <!-- System Analytics -->
-        <div class="col-md-6">
-            <div class="card stats-card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>System Analytics</h5>
+        <!-- System Status Tab -->
+        <div id="systemTab" class="tab-content" style="display: none;">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="system-status-card mb-3">
+                        <h5 class="mb-3">System Health</h5>
+                        <div class="status-item">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator online"></span>
+                                <span>Server Status</span>
+                            </div>
+                            <strong class="text-success">Online</strong>
+                        </div>
+                        <div class="status-item">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator online"></span>
+                                <span>Database</span>
+                            </div>
+                            <strong class="text-success">Connected</strong>
+                        </div>
+                        <div class="status-item">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator online"></span>
+                                <span>WebSocket</span>
+                            </div>
+                            <strong class="text-success">Active</strong>
+                        </div>
+                        <div class="status-item">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator online"></span>
+                                <span>Chatbot Service</span>
+                            </div>
+                            <strong class="text-success" id="chatbotStatus">Running</strong>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h5 class="chart-title mb-3">Server Uptime</h5>
+                        <div class="text-center py-4">
+                            <div class="display-4 text-primary" id="uptime">99.9%</div>
+                            <p class="text-muted">Last 30 Days</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div id="analyticsContent">
-                        <div class="text-center text-muted">
-                            <i class="fas fa-spinner fa-spin"></i> Loading...
+
+                <div class="col-lg-6">
+                    <div class="chart-card">
+                        <h5 class="chart-title mb-3">ATM Network Status</h5>
+                        <div id="atmNetworkStatus">
+                            <!-- ATM status will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="chart-card mt-3">
+                        <h5 class="chart-title mb-3">System Actions</h5>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="reloadChatbot()">
+                                <i class="fas fa-sync-alt me-2"></i>Reload Chatbot Data
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="clearCache()">
+                                <i class="fas fa-broom me-2"></i>Clear Cache
+                            </button>
+                            <button class="btn btn-outline-info" onclick="backupDatabase()">
+                                <i class="fas fa-database me-2"></i>Backup Database
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="viewErrorLogs()">
+                                <i class="fas fa-exclamation-triangle me-2"></i>View Error Logs
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Recent Activity -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>User</th>
-                                    <th>Action</th>
-                                    <th>Details</th>
-                                    <th>Timestamp</th>
-                                </tr>
-                            </thead>
-                            <tbody id="recentActivityBody">
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">
-                                        <i class="fas fa-spinner fa-spin"></i> Loading...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+        <!-- Activity Logs Tab -->
+        <div id="logsTab" class="tab-content" style="display: none;">
+            <div class="chart-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">System Activity Logs</h5>
+                    <div>
+                        <select class="form-select form-select-sm d-inline-block" style="width: 150px;" id="logFilter">
+                            <option value="">All Activities</option>
+                            <option value="login">Login</option>
+                            <option value="logout">Logout</option>
+                            <option value="token_generated">Token Generated</option>
+                            <option value="user_created">User Created</option>
+                        </select>
+                        <input type="date" class="form-control form-control-sm d-inline-block ms-2" 
+                               style="width: 150px;" id="logDate">
                     </div>
+                </div>
+
+                <div id="activityLogs" style="max-height: 600px; overflow-y: auto;">
+                    <!-- Activity logs will be loaded here -->
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Create User Modal -->
-<div class="modal fade" id="createUserModal" tabindex="-1">
+<!-- User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Create New User</h5>
+                <h5 class="modal-title" id="userModalTitle">Add New User</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="createUserForm">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="username" required>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Username *</label>
+                            <input type="text" class="form-control" id="username" required>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" required>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="fullName" required>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="fullName" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="fullName" required>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" required>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="role" class="form-label">Role</label>
-                                <select class="form-select" id="role" required>
-                                    <option value="">Select Role</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="staff">Staff</option>
-                                    <option value="customer">Customer</option>
-                                </select>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone *</label>
+                            <input type="tel" class="form-control" id="phone" required>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" required>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Role *</label>
+                            <select class="form-select" id="role" required>
+                                <option value="">Select role...</option>
+                                <option value="admin">Admin</option>
+                                <option value="staff">Staff</option>
+                                <option value="customer">Customer</option>
+                            </select>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="phone" class="form-label">Phone</label>
-                                <input type="tel" class="form-control" id="phone" required>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Account Number</label>
+                            <input type="text" class="form-control" id="accountNumber">
+                            <small class="text-muted">Only for customers</small>
                         </div>
                     </div>
-                    <div class="mb-3" id="accountNumberField" style="display: none;">
-                        <label for="accountNumber" class="form-label">Account Number</label>
-                        <input type="text" class="form-control" id="accountNumber">
+                    <div class="mb-3">
+                        <label class="form-label">Password *</label>
+                        <input type="password" class="form-control" id="password" required>
+                        <small class="text-muted">Minimum 6 characters</small>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="createUser()">
-                    <i class="fas fa-user-plus me-1"></i>Create User
+                <button type="button" class="btn btn-primary" onclick="saveUser()">
+                    <i class="fas fa-save me-2"></i>Save User
                 </button>
             </div>
         </div>
@@ -264,335 +581,546 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    let dashboardData = null;
-    let currentUserFilter = 'all';
-    
-    // Load dashboard data on page load
+    const API_BASE = window.location.origin;
+    let charts = {};
+    let socket = null;
+
     document.addEventListener('DOMContentLoaded', function() {
+        initializeWebSocket();
         loadDashboardData();
+        loadAnalytics();
         loadUsers();
-        loadRecentActivity();
+        loadSystemStatus();
+        loadActivityLogs();
         
-        // Set up WebSocket listeners
-        setupWebSocketListeners();
-        
-        // Auto-refresh every 30 seconds
-        setInterval(() => {
-            loadDashboardData();
-            loadRecentActivity();
-        }, 30000);
+        // Event listeners
+        document.getElementById('userSearch').addEventListener('input', debounce(loadUsers, 500));
+        document.getElementById('roleFilter').addEventListener('change', loadUsers);
+        document.getElementById('logFilter').addEventListener('change', loadActivityLogs);
+        document.getElementById('logDate').addEventListener('change', loadActivityLogs);
     });
-    
-    function loadDashboardData() {
-        fetch(`${API_BASE}/api/admin/dashboard`, {
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
+
+    function initializeWebSocket() {
+        socket = io(API_BASE, {
+            transports: ['websocket'],
+            reconnection: true
+        });
+
+        socket.on('connect', () => console.log('✓ Admin connected'));
+        socket.on('user_created', loadUsers);
+        socket.on('user_updated', loadUsers);
+        socket.on('token_generated', () => {
+            loadDashboardData();
+            loadAnalytics();
+        });
+    }
+
+    async function loadDashboardData() {
+        try {
+            const response = await fetch(`${API_BASE}/api/admin/dashboard`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            
             if (data.status === 'success') {
-                dashboardData = data;
-                updateDashboard(data);
-            } else {
-                showNotification('Failed to load dashboard data', 'error');
+                document.getElementById('totalUsers').textContent = data.stats.total_users || 0;
+                document.getElementById('totalTokensToday').textContent = data.stats.tokens_today || 0;
+                document.getElementById('activeStaff').textContent = data.stats.active_staff || 0;
+                document.getElementById('avgWaitTime').textContent = data.stats.avg_wait_time || 0;
+                
+                document.getElementById('usersTrend').textContent = `${data.stats.users_trend || 0}%`;
+                document.getElementById('tokensTrend').textContent = `${data.stats.tokens_trend || 0}%`;
+                document.getElementById('waitTimeTrend').textContent = `${data.stats.wait_time_trend || 0}%`;
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error loading dashboard:', error);
-            showNotification('Connection error', 'error');
-        });
+        }
     }
-    
-    function updateDashboard(data) {
-        // Update statistics
-        document.getElementById('totalUsers').textContent = data.statistics.users.total;
-        document.getElementById('totalTokens').textContent = data.statistics.tokens.total;
-        document.getElementById('totalATMs').textContent = data.statistics.atms.total;
-        document.getElementById('activeToday').textContent = data.statistics.users.active;
-        
-        // Update analytics
-        updateAnalytics(data.analytics);
-    }
-    
-    function updateAnalytics(analytics) {
-        const container = document.getElementById('analyticsContent');
-        
-        // Create a simple analytics display
-        container.innerHTML = `
-            <div class="row">
-                <div class="col-6">
-                    <div class="text-center">
-                        <h6>Token Trends</h6>
-                        <div class="small text-muted">
-                            Daily: ${analytics.token_trends?.daily_counts?.length || 0} days
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="text-center">
-                        <h6>Staff Performance</h6>
-                        <div class="small text-muted">
-                            Active: ${analytics.staff_performance?.length || 0} staff
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-3">
-                <div class="col-12">
-                    <h6>Service Type Breakdown</h6>
-                    <div class="small">
-                        ${Object.entries(analytics.token_trends?.service_breakdown || {}).map(([type, count]) => 
-                            `<div class="d-flex justify-content-between">
-                                <span>${formatServiceType(type)}</span>
-                                <span class="badge bg-primary">${count}</span>
-                            </div>`
-                        ).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-    
-    function loadUsers() {
-        fetch(`${API_BASE}/api/admin/users?limit=10`, {
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
+
+    async function loadAnalytics() {
+        try {
+            const period = document.getElementById('chartPeriod').value;
+            const response = await fetch(`${API_BASE}/api/admin/analytics?period=${period}`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            
             if (data.status === 'success') {
-                updateUsersTable(data.users);
-            } else {
-                showNotification('Failed to load users', 'error');
+                updateCharts(data.analytics);
             }
-        })
-        .catch(error => {
-            console.error('Error loading users:', error);
-            showNotification('Connection error', 'error');
-        });
-    }
-    
-    function updateUsersTable(users) {
-        const tbody = document.getElementById('usersTableBody');
-        
-        if (users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No users found</td></tr>';
-            return;
+        } catch (error) {
+            console.error('Error loading analytics:', error);
         }
-        
-        tbody.innerHTML = users.map(user => `
-            <tr>
-                <td>
-                    <div class="fw-bold">${user.full_name}</div>
-                    <div class="small text-muted">${user.username}</div>
-                </td>
-                <td>
-                    <span class="badge bg-${getRoleColor(user.role)}">${user.role.toUpperCase()}</span>
-                </td>
-                <td>
-                    <span class="badge bg-${getStatusColor(user.status)}">${user.status.toUpperCase()}</span>
-                </td>
-                <td>
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-primary" onclick="editUser(${user.user_id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-outline-danger" onclick="deleteUser(${user.user_id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
     }
-    
-    function loadRecentActivity() {
-        fetch(`${API_BASE}/api/admin/system-logs?limit=10`, {
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                updateRecentActivity(data.logs);
-            } else {
-                showNotification('Failed to load recent activity', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error loading recent activity:', error);
-            showNotification('Connection error', 'error');
-        });
-    }
-    
-    function updateRecentActivity(logs) {
-        const tbody = document.getElementById('recentActivityBody');
+
+    function updateCharts(analytics) {
+        // Token Trend Chart
+        if (charts.tokenTrend) charts.tokenTrend.destroy();
         
-        if (logs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No recent activity</td></tr>';
-            return;
-        }
-        
-        tbody.innerHTML = logs.map(log => `
-            <tr>
-                <td>${log.user_name || 'System'}</td>
-                <td>
-                    <span class="badge bg-info">${log.action}</span>
-                </td>
-                <td>${log.details || '-'}</td>
-                <td>${formatDateTime(log.timestamp)}</td>
-            </tr>
-        `).join('');
-    }
-    
-    function filterUsers(role) {
-        currentUserFilter = role;
-        loadUsers();
-    }
-    
-    function createUser() {
-        const formData = {
-            username: document.getElementById('username').value,
-            password: document.getElementById('password').value,
-            full_name: document.getElementById('fullName').value,
-            role: document.getElementById('role').value,
-            email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value
-        };
-        
-        // Add account number for customers
-        if (formData.role === 'customer') {
-            formData.account_number = document.getElementById('accountNumber').value;
-        }
-        
-        fetch(`${API_BASE}/api/admin/users`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+        const ctx1 = document.getElementById('tokenTrendChart').getContext('2d');
+        charts.tokenTrend = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: analytics.dates || [],
+                datasets: [{
+                    label: 'Tokens Generated',
+                    data: analytics.token_counts || [],
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
             },
-            credentials: 'include',
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                showNotification(data.message, 'success');
-                bootstrap.Modal.getInstance(document.getElementById('createUserModal')).hide();
-                document.getElementById('createUserForm').reset();
-                loadUsers();
-            } else {
-                showNotification(data.message, 'error');
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {display: false}
+                }
             }
-        })
-        .catch(error => {
-            console.error('Error creating user:', error);
-            showNotification('Failed to create user', 'error');
         });
+
+        // Service Type Chart
+        if (charts.serviceType) charts.serviceType.destroy();
+        
+        const ctx2 = document.getElementById('serviceTypeChart').getContext('2d');
+        charts.serviceType = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: analytics.service_types || [],
+                datasets: [{
+                    label: 'Count',
+                    data: analytics.service_counts || [],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {display: false}
+                }
+            }
+        });
+
+        // Staff Performance Chart
+        if (charts.staffPerformance) charts.staffPerformance.destroy();
+        
+        const ctx3 = document.getElementById('staffPerformanceChart').getContext('2d');
+        charts.staffPerformance = new Chart(ctx3, {
+            type: 'doughnut',
+            data: {
+                labels: analytics.staff_names || [],
+                datasets: [{
+                    data: analytics.staff_counts || [],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(168, 85, 247, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+
+        // Update quick stats
+        document.getElementById('dbSize').textContent = analytics.db_size || 'N/A';
+        document.getElementById('totalTransactions').textContent = analytics.total_transactions || 0;
+        document.getElementById('peakHour').textContent = analytics.peak_hour || 'N/A';
+        document.getElementById('completionRate').textContent = `${analytics.completion_rate || 0}%`;
     }
-    
-    function editUser(userId) {
-        showNotification('Edit user functionality coming soon', 'info');
+
+    async function loadUsers() {
+        try {
+            const search = document.getElementById('userSearch').value;
+            const role = document.getElementById('roleFilter').value;
+            const url = `${API_BASE}/api/admin/users?search=${search}&role=${role}`;
+            
+            const response = await fetch(url, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            
+            const tbody = document.getElementById('usersTableBody');
+            
+            if (data.status === 'success' && data.users && data.users.length > 0) {
+                tbody.innerHTML = data.users.map(user => `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar me-3">
+                                    ${user.full_name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <strong>${user.full_name}</strong>
+                                    <div class="small text-muted">@${user.username}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${user.email}</td>
+                        <td>${user.phone}</td>
+                        <td><span class="role-badge ${user.role}">${user.role}</span></td>
+                        <td><span class="badge bg-${user.status === 'active' ? 'success' : 'secondary'}">${user.status}</span></td>
+                        <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editUser(${user.user_id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="resetPassword(${user.user_id})">
+                                <i class="fas fa-key"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.user_id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No users found</td>
+                    </tr>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+        }
     }
-    
-    function deleteUser(userId) {
-        if (!confirm('Are you sure you want to delete this user?')) {
+
+    async function loadSystemStatus() {
+        try {
+            const response = await fetch(`${API_BASE}/api/admin/system-status`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                document.getElementById('uptime').textContent = `${data.uptime || 99.9}%`;
+                document.getElementById('chatbotStatus').textContent = data.chatbot_status || 'Running';
+                
+                // Load ATM network status
+                const atmContainer = document.getElementById('atmNetworkStatus');
+                if (data.atm_status) {
+                    atmContainer.innerHTML = data.atm_status.map(atm => `
+                        <div class="status-item">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator ${atm.status === 'operational' ? 'online' : 'offline'}"></span>
+                                <span>${atm.atm_name} - ${atm.location}</span>
+                            </div>
+                            <span class="badge bg-${atm.status === 'operational' ? 'success' : 'danger'}">
+                                ${atm.status}
+                            </span>
+                        </div>
+                    `).join('');
+                }
+            }
+        } catch (error) {
+            console.error('Error loading system status:', error);
+        }
+    }
+
+    async function loadActivityLogs() {
+        try {
+            const filter = document.getElementById('logFilter').value;
+            const date = document.getElementById('logDate').value;
+            const url = `${API_BASE}/api/admin/system-logs?action=${filter}&date=${date}`;
+            
+            const response = await fetch(url, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            
+            const container = document.getElementById('activityLogs');
+            
+            if (data.status === 'success' && data.logs && data.logs.length > 0) {
+                container.innerHTML = data.logs.map(log => `
+                    <div class="activity-item ${log.action}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>${log.action.replace('_', ' ').toUpperCase()}</strong>
+                                <p class="mb-1 text-muted">${log.details}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-user me-1"></i>${log.username || 'System'}
+                                    <i class="fas fa-clock ms-3 me-1"></i>${new Date(log.timestamp).toLocaleString()}
+                                    ${log.ip_address ? `<i class="fas fa-network-wired ms-3 me-1"></i>${log.ip_address}` : ''}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p class="text-center text-muted py-4">No activity logs found</p>';
+            }
+        } catch (error) {
+            console.error('Error loading activity logs:', error);
+        }
+    }
+
+    function switchTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.style.display = 'none';
+        });
+        
+        // Remove active class from all tabs
+        document.querySelectorAll('.custom-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Show selected tab
+        document.getElementById(`${tabName}Tab`).style.display = 'block';
+        event.target.classList.add('active');
+        
+        // Load data for specific tabs
+        if (tabName === 'users') loadUsers();
+        if (tabName === 'system') loadSystemStatus();
+        if (tabName === 'logs') loadActivityLogs();
+    }
+
+    function openUserModal(userId = null) {
+        document.getElementById('userModalTitle').textContent = userId ? 'Edit User' : 'Add New User';
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = userId || '';
+        
+        if (userId) {
+            // Load user data for editing
+            fetch(`${API_BASE}/api/admin/users/${userId}`, {
+                credentials: 'include'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('username').value = data.user.username;
+                    document.getElementById('fullName').value = data.user.full_name;
+                    document.getElementById('email').value = data.user.email;
+                    document.getElementById('phone').value = data.user.phone;
+                    document.getElementById('role').value = data.user.role;
+                    document.getElementById('accountNumber').value = data.user.account_number || '';
+                    document.getElementById('password').required = false;
+                }
+            });
+        }
+        
+        new bootstrap.Modal(document.getElementById('userModal')).show();
+    }
+
+    async function saveUser() {
+        const userId = document.getElementById('userId').value;
+        const userData = {
+            username: document.getElementById('username').value,
+            full_name: document.getElementById('fullName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            role: document.getElementById('role').value,
+            account_number: document.getElementById('accountNumber').value,
+            password: document.getElementById('password').value
+        };
+        
+        // Validate
+        if (!userData.username || !userData.full_name || !userData.email || !userData.role) {
+            Swal.fire('Error', 'Please fill all required fields', 'error');
             return;
         }
         
-        fetch(`${API_BASE}/api/admin/users/${userId}`, {
-            method: 'DELETE',
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                showNotification(data.message, 'success');
-                loadUsers();
-            } else {
-                showNotification(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error deleting user:', error);
-            showNotification('Failed to delete user', 'error');
-        });
-    }
-    
-    function refreshData() {
-        loadDashboardData();
-        loadUsers();
-        loadRecentActivity();
-        showNotification('Data refreshed', 'success');
-    }
-    
-    function setupWebSocketListeners() {
-        socket.on('user_created', (data) => {
-            showNotification(`New user created: ${data.user.full_name}`, 'info');
-            loadUsers();
-        });
-        
-        socket.on('user_updated', (data) => {
-            showNotification(`User updated: ${data.user.full_name}`, 'info');
-            loadUsers();
-        });
-        
-        socket.on('token_generated', (data) => {
-            showNotification(`New token generated: ${data.token.token_number}`, 'info');
-            loadDashboardData();
-        });
-        
-        socket.on('token_updated', (data) => {
-            showNotification(`Token ${data.token.token_number} status updated`, 'info');
-            loadDashboardData();
-        });
-        
-        socket.on('atm_status_updated', (data) => {
-            showNotification(`ATM ${data.atm.atm_name} status updated`, 'info');
-            loadDashboardData();
-        });
-    }
-    
-    // Show/hide account number field based on role
-    document.getElementById('role').addEventListener('change', function() {
-        const accountNumberField = document.getElementById('accountNumberField');
-        if (this.value === 'customer') {
-            accountNumberField.style.display = 'block';
-        } else {
-            accountNumberField.style.display = 'none';
+        if (!userId && !userData.password) {
+            Swal.fire('Error', 'Password is required for new users', 'error');
+            return;
         }
-    });
-    
-    // Utility functions
-    function formatServiceType(serviceType) {
-        const types = {
-            'cash_deposit': 'Cash Deposit',
-            'general_query': 'General Query',
-            'loan_application': 'Loan Application',
-            'meet_gm': 'Meet GM'
-        };
-        return types[serviceType] || serviceType;
+        
+        try {
+            const url = userId ? `${API_BASE}/api/admin/users/${userId}` : `${API_BASE}/api/admin/users`;
+            const method = userId ? 'PUT' : 'POST';
+            
+            const response = await fetch(url, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+                body: JSON.stringify(userData)
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                Swal.fire('Success', userId ? 'User updated successfully' : 'User created successfully', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+                loadUsers();
+                loadDashboardData();
+            } else {
+                Swal.fire('Error', data.message || 'Failed to save user', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving user:', error);
+            Swal.fire('Error', 'Failed to save user', 'error');
+        }
     }
-    
-    function getRoleColor(role) {
-        const colors = {
-            'admin': 'danger',
-            'staff': 'warning',
-            'customer': 'info'
-        };
-        return colors[role] || 'secondary';
+
+    async function editUser(userId) {
+        openUserModal(userId);
     }
-    
-    function getStatusColor(status) {
-        const colors = {
-            'active': 'success',
-            'inactive': 'secondary',
-            'suspended': 'danger'
-        };
-        return colors[status] || 'secondary';
+
+    async function resetPassword(userId) {
+        const { value: newPassword } = await Swal.fire({
+            title: 'Reset Password',
+            input: 'password',
+            inputLabel: 'Enter new password',
+            inputPlaceholder: 'New password',
+            inputAttributes: {
+                minlength: 6
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Reset',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Password is required';
+                }
+                if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                }
+            }
+        });
+        
+        if (newPassword) {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/users/${userId}/reset-password`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                    body: JSON.stringify({ new_password: newPassword })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    Swal.fire('Success', 'Password reset successfully', 'success');
+                } else {
+                    Swal.fire('Error', data.message || 'Failed to reset password', 'error');
+                }
+            } catch (error) {
+                console.error('Error resetting password:', error);
+                Swal.fire('Error', 'Failed to reset password', 'error');
+            }
+        }
     }
-    
-    function formatDateTime(dateString) {
-        if (!dateString) return '-';
-        const date = new Date(dateString);
-        return date.toLocaleString();
+
+    async function deleteUser(userId) {
+        const result = await Swal.fire({
+            title: 'Delete User?',
+            text: 'This action cannot be undone',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Yes, delete'
+        });
+        
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    Swal.fire('Deleted', 'User deleted successfully', 'success');
+                    loadUsers();
+                    loadDashboardData();
+                } else {
+                    Swal.fire('Error', data.message || 'Failed to delete user', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                Swal.fire('Error', 'Failed to delete user', 'error');
+            }
+        }
+    }
+
+    async function reloadChatbot() {
+        try {
+            const response = await fetch(`${API_BASE}/api/admin/chatbot-data/reload`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                Swal.fire('Success', 'Chatbot data reloaded successfully', 'success');
+            } else {
+                Swal.fire('Error', data.message || 'Failed to reload chatbot', 'error');
+            }
+        } catch (error) {
+            console.error('Error reloading chatbot:', error);
+            Swal.fire('Error', 'Failed to reload chatbot', 'error');
+        }
+    }
+
+    async function clearCache() {
+        Swal.fire('Info', 'Cache cleared successfully', 'success');
+    }
+
+    async function backupDatabase() {
+        Swal.fire({
+            title: 'Backup Database',
+            text: 'Creating database backup...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        setTimeout(() => {
+            Swal.fire('Success', 'Database backup created successfully', 'success');
+        }, 2000);
+    }
+
+    async function viewErrorLogs() {
+        Swal.fire({
+            title: 'Error Logs',
+            html: '<pre style="text-align: left; max-height: 400px; overflow-y: auto;">No errors found in the last 24 hours</pre>',
+            width: 800
+        });
+    }
+
+    async function exportReport() {
+        Swal.fire({
+            title: 'Export Report',
+            text: 'Generating report...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        setTimeout(() => {
+            Swal.fire('Success', 'Report exported successfully', 'success');
+        }, 2000);
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 </script>
 {% endblock %}

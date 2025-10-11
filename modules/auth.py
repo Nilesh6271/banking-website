@@ -1,6 +1,7 @@
 from flask_login import login_user, logout_user, current_user
 from flask import session, request
-from database.models import User, SystemLog, db
+from database import db
+from database.models import User, SystemLog
 from utils.helpers import get_client_ip
 from datetime import datetime
 import bcrypt
