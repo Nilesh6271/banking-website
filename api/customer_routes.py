@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
+from flask_login import current_user
 from modules.token_manager import generate_token, get_customer_tokens, cancel_token
 from modules.atm_manager import get_all_atm_status
 from modules.analytics import get_token_statistics
-from utils.decorators import role_required, validate_json_content_type, handle_errors
+from utils.decorators import validate_json_content_type, handle_errors
+from utils.api_decorators import api_login_required, api_role_required
 from utils.validators import validate_token_data, validate_pagination_params
 from utils.helpers import get_pagination_info
 from database import db
@@ -13,8 +14,8 @@ from flask_socketio import emit
 customer_bp = Blueprint('customer', __name__)
 
 @customer_bp.route('/dashboard', methods=['GET'])
-@login_required
-@role_required('customer')
+@api_login_required
+@api_role_required('customer')
 @handle_errors
 def customer_dashboard():
     """Get customer dashboard data"""
@@ -44,8 +45,8 @@ def customer_dashboard():
     })
 
 @customer_bp.route('/token/generate', methods=['POST'])
-@login_required
-@role_required('customer')
+@api_login_required
+@api_role_required('customer')
 @validate_json_content_type
 @handle_errors
 def generate_customer_token():
@@ -83,8 +84,8 @@ def generate_customer_token():
     })
 
 @customer_bp.route('/token/history', methods=['GET'])
-@login_required
-@role_required('customer')
+@api_login_required
+@api_role_required('customer')
 @handle_errors
 def get_token_history():
     """Get customer token history"""
@@ -119,8 +120,8 @@ def get_token_history():
     })
 
 @customer_bp.route('/token/<int:token_id>', methods=['GET'])
-@login_required
-@role_required('customer')
+@api_login_required
+@api_role_required('customer')
 @handle_errors
 def get_token_details(token_id):
     """Get specific token details"""
@@ -141,8 +142,8 @@ def get_token_details(token_id):
     })
 
 @customer_bp.route('/token/<int:token_id>', methods=['DELETE'])
-@login_required
-@role_required('customer')
+@api_login_required
+@api_role_required('customer')
 @handle_errors
 def cancel_customer_token(token_id):
     """Cancel customer token"""
@@ -163,8 +164,8 @@ def cancel_customer_token(token_id):
     return jsonify(result)
 
 @customer_bp.route('/atm-status', methods=['GET'])
-@login_required
-@role_required('customer')
+@api_login_required
+@api_role_required('customer')
 @handle_errors
 def get_atm_status():
     """Get ATM status for customers"""
@@ -176,8 +177,8 @@ def get_atm_status():
     })
 
 @customer_bp.route('/profile', methods=['GET'])
-@login_required
-@role_required('customer')
+@api_login_required
+@api_role_required('customer')
 @handle_errors
 def get_customer_profile():
     """Get customer profile"""
@@ -187,8 +188,8 @@ def get_customer_profile():
     })
 
 @customer_bp.route('/profile', methods=['PUT'])
-@login_required
-@role_required('customer')
+@api_login_required
+@api_role_required('customer')
 @validate_json_content_type
 @handle_errors
 def update_customer_profile():
@@ -211,8 +212,8 @@ def update_customer_profile():
     })
 
 @customer_bp.route('/notifications', methods=['GET'])
-@login_required
-@role_required('customer')
+@api_login_required
+@api_role_required('customer')
 @handle_errors
 def get_customer_notifications():
     """Get customer notifications"""

@@ -24,11 +24,17 @@ def authenticate_user(username, password):
         db.session.commit()
         
         # Log login activity
+        try:
+            ip_address = get_client_ip()
+        except RuntimeError:
+            # No request context, use default IP
+            ip_address = '127.0.0.1'
+            
         log_entry = SystemLog(
             user_id=user.user_id,
             action='login',
             details=f'User {username} logged in',
-            ip_address=get_client_ip(),
+            ip_address=ip_address,
             timestamp=datetime.utcnow()
         )
         db.session.add(log_entry)
